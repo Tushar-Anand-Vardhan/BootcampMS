@@ -1,4 +1,5 @@
 const UserModel = require("../models/userModel");
+const sendToken = require("../utils/jwtTokens");
 
 // Add a user, admin uses this method to add a new member to the bootcamp
 // the new user can be a NCG, a mentor or another admin
@@ -60,6 +61,27 @@ exports.removeUser = async (req,res,next)=>{
 // and if the email is present then only, 
 // that ncg / mentor / admin will be added to it's respective DM
 
-exports.registerNewUser = async (req,res,next)=>{
+
+exports.loginUser = async (req,res,next)=>{
+    const {email} = req.body
+    if(!email){
+        res.status(404).json({
+            success:false,
+            message:"Please enter your Email"
+        })
+        return 
+    }
+    const user = await UserModel.findOne({ email });
+    if(!user){
+        res.status(401).json({
+            success:false,
+            message:"User is not added to the bootcamp, please contact admin"
+        })
+        return
+    }
+
+    else {
+        sendToken(user,200,res);
+    }
 
 }

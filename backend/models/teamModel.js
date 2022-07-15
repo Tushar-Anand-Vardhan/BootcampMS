@@ -6,13 +6,13 @@ const teamSchema = mongoose.Schema({
         ref: "Team No ",
         required: [true,"Please enter Team No."]
     },
-
+   
     members : [
     {
         name:{
             type:String,
             required: [true]
-    },
+        },
         email:{
             type: String,
             required: [true],
@@ -21,5 +21,4 @@ const teamSchema = mongoose.Schema({
     }
 ]
 })
-
 module.exports = mongoose.model("TeamModel", teamSchema);
