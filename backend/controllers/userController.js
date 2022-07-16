@@ -4,12 +4,36 @@ const sendToken = require("../utils/jwtTokens");
 // Add a user, admin uses this method to add a new member to the bootcamp
 // the new user can be a NCG, a mentor or another admin
 exports.addUser = async (req,res,next)=>{
-    const newUser = await UserModel.create(req.body);
+    try {
+        const newUser = await UserModel.create(req.body);    
+        res.status(201).json({
+            success: true,
+            newUser
+        })
 
-    res.status(201).json({
-        success: true,
-        newUser
-    })
+    } catch (error) {
+        const errors = {email:"" , password: "" , name:""}
+
+        if(error.code === 11000){
+            errors.email = "This email is registered already";
+            res.status(404).json({
+                success: false,
+                errors
+            })
+             
+        }
+    
+        Object.values(error.errors).forEach(({properties})=>{
+            errors[properties.path] = properties.message;
+
+        })
+        res.status(404).json({
+            success: false,
+            errors
+        })
+    }
+    
+    
 }
 // get alll users, used to display all the users in the admins dashboard
 exports.getAllUsers = async (req,res,next)=>{
@@ -73,7 +97,7 @@ exports.loginUser = async (req,res,next)=>{
     }
     const user = await UserModel.findOne({ email });
     if(!user){
-        res.status(401).json({
+        res.status(403).json({
             success:false,
             message:"User is not added to the bootcamp, please contact admin"
         })
@@ -84,4 +108,18 @@ exports.loginUser = async (req,res,next)=>{
         sendToken(user,200,res);
     }
 
+}
+
+//log out user
+exports.logoutUser =async (req,res,next)=>{
+    
+    res.cookie("token" , null , {
+        expires: new Date(Date.now()),
+        httpOnly:true,
+    })
+    
+    res.status(200).json({
+        success: true,
+        message:"logged out",
+    })
 }
