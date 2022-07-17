@@ -5,10 +5,10 @@ const {createAssignment, getAllAssignments, updateAssignment, deleteAssignment, 
 
 
 router.route("/getAllAssignments").get(getAllAssignments);
-router.route("/admin/getAssignment/{assignId}").get(getAssignment);
-router.route("/admin/createAssignment").post(createAssignment);
-router.route("/admin/updateAssignment").post(updateAssignment);
-router.route("/admin/deleteAssignment").delete(deleteAssignment);
+router.route("/admin/assignments/getAssignment/{assignId}").get(getAssignment);
+router.route("/admin/assignments/createAssignment").post(createAssignment);
+router.route("/admin/assignments/updateAssignment").post(updateAssignment);
+router.route("/admin/assignments/deleteAssignment").delete(deleteAssignment);
 
 
 

@@ -1,6 +1,8 @@
 const mongoose = require("mongoose")
+const assignmentSchema = require("./assignmentModel");
 const validator = require("validator")
 const jwt = require("jsonwebtoken")
+
 const userSchema = mongoose.Schema({
     name:{
         type:String,
@@ -22,26 +24,11 @@ const userSchema = mongoose.Schema({
         type: String,
         default: "NCG"
     },
-    teamAssignments:{
-        teamId:Number,
-        assignments:[
-            {
-                title:String,
-                marks:Number,
-                submittedAt: Date
-            }
-        
-        ]
-    },
-    assignments:{
-        
-            title:String,
-            marks:Number,
-            submittedAt: Date
-        
-    },
-
+    assignments:[{type: mongoose.Schema.Types.ObjectId, default: 0, ref: assignmentSchema}],
 })
+
+
+
 
 // JWT TOKEN
 userSchema.methods.getJWTToken = function(){
@@ -49,5 +36,7 @@ userSchema.methods.getJWTToken = function(){
         expiresIn:process.env.JWT_EXPIRE,
     });
 }
+
+
 
 module.exports = mongoose.model("UserModel", userSchema);

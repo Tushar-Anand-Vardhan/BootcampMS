@@ -1,4 +1,6 @@
 const UserModel = require("../models/userModel");
+const IndividualAssignmentModel = require("../models/individualAssignmentModel");
+const AssignmentModel = require("../models/assignmentModel");
 const sendToken = require("../utils/jwtTokens");
 
 // Add a user, admin uses this method to add a new member to the bootcamp
@@ -19,7 +21,21 @@ exports.getAllUsers = async (req,res,next)=>{
         allUsers
     })
 }
-
+// Add a assignment, admin uses this method to add a new assignment for all users
+exports.createAssignmentsForAll = async (req,res,next)=>{
+    const newAssignment = await AssignmentModel.create(req.body);
+    if(newAssignment) {
+    const updatedAssignments = await UserModel.updateMany({}, 
+        { $push: {
+        assignments: req.body.assignment
+    } })
+    }
+    
+    res.status(201).json({
+        success: true,
+        newAssignment
+    })
+}
 // on the admin dashborad, the admin can update 
 exports.updateUser = async (req,res,next)=>{
     const updatedUserData = {

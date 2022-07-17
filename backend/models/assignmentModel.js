@@ -2,8 +2,7 @@ const mongoose = require("mongoose")
 
 const assignmentSchema = mongoose.Schema({
     assignId: {
-        type: mongoose.Schema.ObjectId,
-        ref: "Assignment Id",
+        type: Number,
         required: true,
     },
     title:{
@@ -21,7 +20,7 @@ const assignmentSchema = mongoose.Schema({
     },
     dueDate: {
         type: Date,
-        default: Date.now,
+        default: Date.now
     }
 })
 

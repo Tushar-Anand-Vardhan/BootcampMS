@@ -21,7 +21,7 @@ exports.getAllAssignments = async (req,res,next)=>{
 // get a particular assignment 
 //will be used by admin for viewing individual assignments
 exports.getAssignment = async (req,res,next)=>{
-    const assignment = await AssignmentModel.findById(req.body.id)
+    const assignment = await AssignmentModel.findById(req.params.id)
     res.status(200).json({
         success:true,
         assignment
@@ -34,6 +34,7 @@ exports.updateAssignment = async (req,res,next)=>{
         assignId : req.body.id,
         title : req.body.newProblemStatement,
         content : req.body.newDescription,
+        credit : req.body.newCredit,
         dueDate : req.body.newDate
     }
 
@@ -42,7 +43,7 @@ exports.updateAssignment = async (req,res,next)=>{
         runValidators:true,
         useFindAndModify: false,
     });
-    console.log(updatedUser)
+    console.log(updatedAssignment)
     res.status(200).json({
         success:true,
         updatedUser
