@@ -1,5 +1,5 @@
 const UserModel = require("../models/userModel");
-const IndividualAssignmentModel = require("../models/individualAssignmentModel");
+// const IndividualAssignmentModel = require("../models/individualAssignmentModel");
 const AssignmentModel = require("../models/assignmentModel");
 const sendToken = require("../utils/jwtTokens");
 
@@ -139,3 +139,10 @@ exports.logoutUser =async (req,res,next)=>{
         message:"logged out",
     })
 }
+
+
+
+
+// submit assignment status ko submitted,
+
+// save assignment link

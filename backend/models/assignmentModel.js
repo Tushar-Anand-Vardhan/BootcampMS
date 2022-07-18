@@ -7,7 +7,7 @@ const assignmentSchema = mongoose.Schema({
     },
     title:{
         type:String,
-        required: [true,"Please enter User Name"]
+        required: [true,"Please enter Assignemnt Name"]
     },
     content: {
         type: String,
@@ -20,8 +20,19 @@ const assignmentSchema = mongoose.Schema({
     },
     dueDate: {
         type: Date,
-        default: Date.now
+        default: Date.now // to do + ask future date
+    },
+
+    status: {
+        type: Number,
+        default: 0
     }
+
+    //status  -- > 0 , 1 -> sub  , 2 marks given, 3 --> due ( etc)  number
+
+
+
+    //submission string , default 
 })
 
 module.exports = mongoose.model("AssignmentModel", assignmentSchema);

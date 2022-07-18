@@ -1,8 +1,7 @@
 const express = require("express")
 
 const router = express.Router()
-const {getAllUsers, addUser, updateUser, removeUser, loginUser, createAssignmentsForAll} = require("../controllers/userController")
-// const {getAllUsers, addUser, updateUser, removeUser, loginUser, logoutUser} = require("../controllers/userController");
+const {getAllUsers, addUser, updateUser, removeUser, loginUser, createAssignmentsForAll,logoutUser} = require("../controllers/userController")
 const isAuthenticatedUser = require("../middleware/auth");
 const authorizedRoles = require("../middleware/authRoles");
 
