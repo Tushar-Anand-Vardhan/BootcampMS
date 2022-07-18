@@ -2,6 +2,7 @@ const UserModel = require("../models/userModel");
 // const IndividualAssignmentModel = require("../models/individualAssignmentModel");
 const AssignmentModel = require("../models/assignmentModel");
 const sendToken = require("../utils/jwtTokens");
+const assignmentModel = require("../models/assignmentModel");
 
 // Add a user, admin uses this method to add a new member to the bootcamp
 // the new user can be a NCG, a mentor or another admin
@@ -140,9 +141,71 @@ exports.logoutUser =async (req,res,next)=>{
     })
 }
 
+exports.submitAssignment = async (req, res, next) => {
+
+    const status = {
+        NOTSUBMITED:0,
+        SUBMMITED:1
+    }
+
+  //  const { assignId, ncgSubmittedLink } = req.body;
+    const ncg_id_1 = req.user.id;
+    const link = req.body.ncgSubmittedLink.link;
+    const assignId = req.body.assignId;
 
 
+    if (!assignId) {
+        res.status(404).json({
+            success: false,
+            message: "Please enter your assignId"
+        })
+        return
+    }
+    const assn = await assignmentModel.findOne({ assignId });
+    if (!assn) {
+        res.status(403).json({
+            success: false,
+            message: "assignId"
+        })
+        return
+    }
+
+    else {
+          
+
+        const assn = await assignmentModel.findOne({ assignId });
+        const statusnow = await assignmentModel.findOne({ncgSubmittedLink: {$elemMatch: {ncg_id: ncg_id_1}}})
+        console.log(ncg_id_1);
+        console.log("-------------------")
+        console.log(statusnow);
+        console.log("-------------------")
+            if(statusnow != 1)
+            {
+                console.log("working")
+            assn.ncgSubmittedLink.push({
+                ncg_id : ncg_id_1 ,
+                link,
+                status:1
+            })
+            
+            assn.save({validateBeforeSave:false});
+                res.status(200).json({
+                    success: true
+                })
+        }
+        else{
+                res.status(200).json({
+                    success: false,
+                    message: "You have already submitted your assn" 
+                })
+        }
+
+        
+    }
+}
 
 // submit assignment status ko submitted,
 
 // save assignment link
+
+// update submission , uysermodel,findbyid, take assignment id, update and push submit array --> eg --> team model,

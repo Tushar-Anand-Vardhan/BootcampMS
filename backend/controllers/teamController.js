@@ -31,7 +31,7 @@ exports.createTeamAssignment = async (req,res,next)=>{
     const updatedAssignment = await TeamModel.updateOne(
         {teamId: req.params.id}, 
         { 
-            $push: {
+            $push: {  // mongo term
                 teamAssignments: newAssignment
             } 
         })
