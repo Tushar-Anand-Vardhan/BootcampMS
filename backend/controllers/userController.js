@@ -1,10 +1,22 @@
+const ErrorHandler = require("../utils/errorHandler");
 const UserModel = require("../models/userModel");
-const IndividualAssignmentModel = require("../models/individualAssignmentModel");
 const AssignmentModel = require("../models/assignmentModel");
 const sendToken = require("../utils/jwtTokens");
+const validatePassword = require("../utils/passValidator");
+const excelToJson = require("../utils/excelToJson");
 
-// Add a user, admin uses this method to add a new member to the bootcamp
-// the new user can be a NCG, a mentor or another admin
+
+exports.addUserFromExcel = async (req,res,next)=>{
+    const userList = excelToJson()
+    UserModel.insertMany(userList)
+    .then(function (docs) {
+        res.json(docs);
+    })
+    .catch(function (err) {
+        res.status(500).send(err);
+    });
+}
+
 exports.addUser = async (req,res,next)=>{
     try {
         const newUser = await UserModel.create(req.body);    
@@ -14,22 +26,21 @@ exports.addUser = async (req,res,next)=>{
         })
 
     } catch (error) {
-        const errors = {email:"" , password: "" , name:""}
+        const errors = {email:"", name:""}
 
         if(error.code === 11000){
             errors.email = "This email is registered already";
-            res.status(404).json({
+            return res.status(404).json({
                 success: false,
                 errors
             })
              
         }
-    
         Object.values(error.errors).forEach(({properties})=>{
             errors[properties.path] = properties.message;
 
         })
-        res.status(404).json({
+        return res.status(404).json({
             success: false,
             errors
         })
@@ -37,7 +48,7 @@ exports.addUser = async (req,res,next)=>{
     
     
 }
-// get alll users, used to display all the users in the admins dashboard
+
 exports.getAllUsers = async (req,res,next)=>{
     const allUsers = await UserModel.find()
     res.status(200).json({
@@ -45,14 +56,17 @@ exports.getAllUsers = async (req,res,next)=>{
         allUsers
     })
 }
-// Add a assignment, admin uses this method to add a new assignment for all users
+
 exports.createAssignmentsForAll = async (req,res,next)=>{
     const newAssignment = await AssignmentModel.create(req.body);
-    if(newAssignment) {
-    const updatedAssignments = await UserModel.updateMany({}, 
-        { $push: {
-        assignments: req.body.assignment
-    } })
+    if(newAssignment){
+        const updatedAssignments = await UserModel.updateMany({},{ 
+            $push:{
+                assignments: req.body.assignment
+            } 
+        })
+    }else{
+        return next(new ErrorHandler("Assignment could not be created",404));
     }
     
     res.status(201).json({
@@ -60,7 +74,7 @@ exports.createAssignmentsForAll = async (req,res,next)=>{
         newAssignment
     })
 }
-// on the admin dashborad, the admin can update 
+
 exports.updateUser = async (req,res,next)=>{
     const updatedUserData = {
         name : req.body.newName,
@@ -74,20 +88,16 @@ exports.updateUser = async (req,res,next)=>{
         runValidators:true,
         useFindAndModify: false,
     });
-    console.log(updatedUser)
     res.status(200).json({
         success:true,
         updatedUser
     })
 }
-// on admin dashboard, admin can delete a user.
+
 exports.removeUser = async (req,res,next)=>{
     const deletedUser = await UserModel.findById(req.body.id);
     if(!deletedUser){
-        res.status(404).json({
-            success:false,
-            message:`user does not exist`
-        })
+        return next(new ErrorHandler("user does not exist",404));
     }
     deletedUser.remove();
     res.status(200).json({
@@ -96,28 +106,50 @@ exports.removeUser = async (req,res,next)=>{
     })
 }
 
-// register a new user,
-// when a new user registers, it's checked in the admins owned list 
-// and if the email is present then only, 
-// that ncg / mentor / admin will be added to it's respective DM
 
-
-exports.loginUser = async (req,res,next)=>{
-    const {email} = req.body
-    if(!email){
-        res.status(404).json({
-            success:false,
-            message:"Please enter your Email"
-        })
-        return 
+exports.registerUser = async (req,res,next)=>{
+    const {email , password } = req.body;
+    if(!email || !password){
+        return next(new ErrorHandler("Please enter your Email and password",404));
     }
-    const user = await UserModel.findOne({ email });
+    const user = await UserModel.findOne({email}).select("+password");
     if(!user){
-        res.status(403).json({
+        return next(new ErrorHandler("User is not added to the bootcamp, please contact admin",403));
+    }
+    // TOOD: send confirmation email , OTP
+    if(user.password!==""){
+        return next(new ErrorHandler("User is already registered",404));
+    }
+    
+    const errors = validatePassword(password);
+    console.log(errors)
+    if(errors.length === 0){
+        user.password = req.body.password;
+        await user.save({validateBeforeSave:false});
+        sendToken(user,200,res);
+    }
+    else{
+        return res.status(404).json({
             success:false,
-            message:"User is not added to the bootcamp, please contact admin"
-        })
-        return
+            errors
+        }) 
+    }
+}
+exports.loginUser = async (req,res,next)=>{
+    const {email,password} = req.body
+    if(!email || !password){
+        return next(new ErrorHandler("Please enter your Email and password",400));
+    }
+    const user = await UserModel.findOne({ email }).select("+password");
+
+    if(!user || user.password===""){
+        return next(new ErrorHandler("User is not added to the bootcamp, please contact admin",401));
+    }
+
+    const isPasswordMatched = await user.comparePassword(password);
+
+    if(!isPasswordMatched){
+        return next(new ErrorHandler("invalid email or password",401));
     }
 
     else {
@@ -126,16 +158,53 @@ exports.loginUser = async (req,res,next)=>{
 
 }
 
-//log out user
+
 exports.logoutUser =async (req,res,next)=>{
-    
+    const {name} = req.user;
     res.cookie("token" , null , {
         expires: new Date(Date.now()),
         httpOnly:true,
     })
-    
     res.status(200).json({
         success: true,
-        message:"logged out",
+        message:`${name} logged out`,
     })
+}
+
+// TODO: API to submit 
+
+exports.submitAssignment = async (req, res, next) => {
+    const status = {
+        NOTSUBMITED:0,
+        SUBMMITED:1,
+        MARKED:2
+    }
+    const ncgId = req.user.id;
+    const link = req.body.ncgSubmittedLink.link;
+    const assignId = req.params.assignId;
+   
+    const assn = await AssignmentModel.findOne({ assignId });
+    if (!assn) {
+        return next(new ErrorHandler("Assignment does not exists",404))
+    }
+    else {
+        const assn = await AssignmentModel.findOne({ assignId });
+            const ncgAssignment = assn.ncgSubmittedLink.find((a)=>{
+                return (a.ncg_id === ncgId);
+            })
+            if(!ncgAssignment){
+                assn.ncgSubmittedLink.push({
+                ncg_id : ncgId ,
+                link,
+                status:status.SUBMMITED
+            });
+            assn.save({validateBeforeSave:false});
+                res.status(200).json({
+                    success: true
+                });
+            }
+            else{
+                return next(new ErrorHandler("You have already submitted your assignment",401))
+            }
+    }
 }

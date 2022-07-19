@@ -8,6 +8,7 @@ const isAuthenticatedUser =async (req,res,next)=>{
             success:false,
             message:"please login to continue"
         })
+        return
     }
 
     const decodedData = jwt.verify(token , process.env.JWT_SECRET)
