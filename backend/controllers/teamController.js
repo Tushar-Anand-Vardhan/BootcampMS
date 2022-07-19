@@ -1,5 +1,6 @@
 const TeamModel = require("../models/teamModel");
 
+// todo: array of ncg id 
 exports.addTeam = async (req,res,next)=>{
     const newTeam = await TeamModel.create(req.body);
 

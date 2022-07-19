@@ -8,7 +8,6 @@ const excelToJson = require("../utils/excelToJson");
 
 exports.addUserFromExcel = async (req,res,next)=>{
     const userList = excelToJson()
-    console.log(userList)
     UserModel.insertMany(userList)
     .then(function (docs) {
         res.json(docs);
@@ -89,7 +88,6 @@ exports.updateUser = async (req,res,next)=>{
         runValidators:true,
         useFindAndModify: false,
     });
-    console.log(updatedUser)
     res.status(200).json({
         success:true,
         updatedUser
@@ -174,3 +172,39 @@ exports.logoutUser =async (req,res,next)=>{
 }
 
 // TODO: API to submit 
+
+exports.submitAssignment = async (req, res, next) => {
+    const status = {
+        NOTSUBMITED:0,
+        SUBMMITED:1,
+        MARKED:2
+    }
+    const ncgId = req.user.id;
+    const link = req.body.ncgSubmittedLink.link;
+    const assignId = req.params.assignId;
+   
+    const assn = await AssignmentModel.findOne({ assignId });
+    if (!assn) {
+        return next(new ErrorHandler("Assignment does not exists",404))
+    }
+    else {
+        const assn = await AssignmentModel.findOne({ assignId });
+            const ncgAssignment = assn.ncgSubmittedLink.find((a)=>{
+                return (a.ncg_id === ncgId);
+            })
+            if(!ncgAssignment){
+                assn.ncgSubmittedLink.push({
+                ncg_id : ncgId ,
+                link,
+                status:status.SUBMMITED
+            });
+            assn.save({validateBeforeSave:false});
+                res.status(200).json({
+                    success: true
+                });
+            }
+            else{
+                return next(new ErrorHandler("You have already submitted your assignment",401))
+            }
+    }
+}
