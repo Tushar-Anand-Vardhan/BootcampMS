@@ -60,11 +60,15 @@ exports.getAllUsers = async (req,res,next)=>{
 exports.createAssignmentsForAll = async (req,res,next)=>{
     const newAssignment = await AssignmentModel.create(req.body);
     if(newAssignment){
-        const updatedAssignments = await UserModel.updateMany({},{ 
+        console.log("hello")
+        const allUsers = await UserModel.find();
+        const updatedAssignments = await UserModel.updateMany({'_id':{ $in : allUsers }},{ 
             $push:{
                 assignments: req.body.assignment
             } 
         })
+
+    console.log(updatedAssignments)
     }else{
         return next(new ErrorHandler("Assignment could not be created",404));
     }
@@ -188,7 +192,6 @@ exports.submitAssignment = async (req, res, next) => {
         return next(new ErrorHandler("Assignment does not exists",404))
     }
     else {
-        const assn = await AssignmentModel.findOne({ assignId });
             const ncgAssignment = assn.ncgSubmittedLink.find((a)=>{
                 return (a.ncg_id === ncgId);
             })
@@ -207,4 +210,20 @@ exports.submitAssignment = async (req, res, next) => {
                 return next(new ErrorHandler("You have already submitted your assignment",401))
             }
     }
+}
+
+// update marks for NCG with given ID
+
+exports.uploadOrUpdateMarks = async (req,res,next) => {
+    const ncgId = req.params.id;
+    const {marks , assignmentId} = req.body;
+    const assignment = await AssignmentModel.findOne({ assignmentId });
+    if (!assignment) {
+        return next(new ErrorHandler("Assignment does not exists",404))
+    }
+    const ncgAssignment = assn.ncgSubmittedLink.find((ncgAssn)=>{
+        return (ncgAssn.ncg_id === ncgId);
+    })
+    console.log(ncgAssignment)
+
 }
