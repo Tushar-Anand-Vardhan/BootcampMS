@@ -4,6 +4,7 @@ const AssignmentModel = require("../models/assignmentModel");
 const sendToken = require("../utils/jwtTokens");
 const validatePassword = require("../utils/passValidator");
 const excelToJson = require("../utils/excelToJson");
+const assignmentModel = require("../models/assignmentModel");
 
 
 exports.addUserFromExcel = async (req,res,next)=>{
@@ -57,27 +58,6 @@ exports.getAllUsers = async (req,res,next)=>{
     })
 }
 
-exports.createAssignmentsForAll = async (req,res,next)=>{
-    const newAssignment = await AssignmentModel.create(req.body);
-    if(newAssignment){
-        console.log("hello")
-        const allUsers = await UserModel.find();
-        const updatedAssignments = await UserModel.updateMany({'_id':{ $in : allUsers }},{ 
-            $push:{
-                assignments: req.body.assignment
-            } 
-        })
-
-    console.log(updatedAssignments)
-    }else{
-        return next(new ErrorHandler("Assignment could not be created",404));
-    }
-    
-    res.status(201).json({
-        success: true,
-        newAssignment
-    })
-}
 
 exports.updateUser = async (req,res,next)=>{
     const updatedUserData = {
@@ -184,10 +164,11 @@ exports.submitAssignment = async (req, res, next) => {
         MARKED:2
     }
     const ncgId = req.user.id;
+    console.log(ncgId)
     const link = req.body.ncgSubmittedLink.link;
     const assignId = req.params.assignId;
    
-    const assn = await AssignmentModel.findOne({ assignId });
+    const assn = await AssignmentModel.findById(assignId);
     if (!assn) {
         return next(new ErrorHandler("Assignment does not exists",404))
     }
@@ -195,12 +176,14 @@ exports.submitAssignment = async (req, res, next) => {
             const ncgAssignment = assn.ncgSubmittedLink.find((a)=>{
                 return (a.ncg_id === ncgId);
             })
-            if(!ncgAssignment){
-                assn.ncgSubmittedLink.push({
-                ncg_id : ncgId ,
-                link,
-                status:status.SUBMMITED
-            });
+            if(ncgAssignment.status === 0){
+                assn.ncgSubmittedLink.forEach((subLink)=>{
+                    if(subLink.ncg_id === ncgId){
+                        subLink.link = link;
+                        subLink.status = status.SUBMMITED;
+                    }
+                })
+
             assn.save({validateBeforeSave:false});
                 res.status(200).json({
                     success: true
@@ -212,18 +195,29 @@ exports.submitAssignment = async (req, res, next) => {
     }
 }
 
-// update marks for NCG with given ID
+// return array of ranks with id of each ncg - top20 preferably 
 
-exports.uploadOrUpdateMarks = async (req,res,next) => {
-    const ncgId = req.params.id;
-    const {marks , assignmentId} = req.body;
-    const assignment = await AssignmentModel.findOne({ assignmentId });
-    if (!assignment) {
-        return next(new ErrorHandler("Assignment does not exists",404))
-    }
-    const ncgAssignment = assn.ncgSubmittedLink.find((ncgAssn)=>{
-        return (ncgAssn.ncg_id === ncgId);
+
+exports.getLeaderboardInfo = async(req,res,next)=>{
+    //todo
+
+    // const allUsers = await UserModel.find();
+
+    // const leaderBoard = []
+    // // rank , ncg name, ncg email , marks
+
+    // allUsers.forEach((usr)=>{
+    //     usr.assignments.forEach((assnId)=>{
+    //         const assignment = await AssignmentModel.findById(assnId);
+
+    //     })
+    // })
+
+    const assignment = await AssignmentModel.find();
+
+    assignment.forEach(()=>{
+
     })
-    console.log(ncgAssignment)
+
 
 }

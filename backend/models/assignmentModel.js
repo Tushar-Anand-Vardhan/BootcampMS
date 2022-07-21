@@ -10,6 +10,10 @@ const assignmentSchema = mongoose.Schema({
         type: Number,
         default: 1
     },
+    maxMarks:{
+        type: Number,
+        default: 100
+    },
     dueDate: {
         type: Date,
         default: Date.now // to do + ask future date
@@ -24,6 +28,7 @@ const assignmentSchema = mongoose.Schema({
         },
         link: {
             type: String,
+            default: ""
         },
         status: {
             type: Number,
@@ -32,11 +37,17 @@ const assignmentSchema = mongoose.Schema({
         date:{
             type: Date,
             default: Date.now
+        },
+        marks:{
+            type:Number,
+            default: 0
         }
     }],
     //status  -- > 0 , 1 -> sub  , 2 marks given, 3 --> due ( etc)  number
     //submission string , default
 })
+
+
 
 
 module.exports = mongoose.model("AssignmentModel", assignmentSchema);

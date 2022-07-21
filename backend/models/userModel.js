@@ -24,7 +24,11 @@ const userSchema = mongoose.Schema({
         type: String,
         default: "NCG"
     },
-    assignments:[{type: mongoose.Schema.Types.ObjectId, default: 0, ref: assignmentSchema}],
+    totalMarks:{
+        type: Number,
+        default: 0
+    },
+    assignments:[{type: String}],
 })
 
 

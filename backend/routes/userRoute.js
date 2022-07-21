@@ -14,8 +14,7 @@ router.route("/user/delete").delete(removeUser);
 router.route("/user/register").post(registerUser);
 router.route("/user/login").post(loginUser);
 router.route("/user/logout").get(isAuthenticatedUser,logoutUser);
-router.route("/user/submitAssignment/:id").post(isAuthenticatedUser,submitAssignment);
-router.route("/user/uploadMarks/:id").post(isAuthenticatedUser,uploadOrUpdateMarks);
+router.route("/user/submitAssignment/:assignId").post(isAuthenticatedUser,submitAssignment);
 
 
 
