@@ -133,6 +133,9 @@ exports.uploadOrUpdateMarks = async (req,res,next) => {
         return next(new ErrorHandler("Assignment does not exists",404))
     }
     else {
+        if(marks > assn.maxMarks){
+            return next(new ErrorHandler(`maximum marks for this assignment is ${assn.maxMarks}`,400))
+        }
             const ncgAssignment = assn.ncgSubmittedLink.find((a)=>{
                 return (a.ncg_id === ncgId);
             })
@@ -151,7 +154,7 @@ exports.uploadOrUpdateMarks = async (req,res,next) => {
             });
 
             const usr = await UserModel.findById(ncgId);
-            usr.totalMarks += marks;
+            usr.totalMarks += (marks*assn.credit*100)/assn.maxMarks;
             usr.save({validateBeforeSave:false});
 
             }

@@ -1,7 +1,7 @@
 const express = require("express")
 
 const router = express.Router()
-const {getAllUsers, addUser, updateUser, removeUser, loginUser, logoutUser, registerUser, addUserFromExcel, submitAssignment, uploadOrUpdateMarks} = require("../controllers/userController")
+const {getAllUsers, addUser, updateUser, removeUser, loginUser, logoutUser, registerUser, addUserFromExcel, submitAssignment, getLeaderboardInfo} = require("../controllers/userController")
 const isAuthenticatedUser = require("../middleware/auth");
 const authorizedRoles = require("../middleware/authRoles");
 
@@ -15,6 +15,7 @@ router.route("/user/register").post(registerUser);
 router.route("/user/login").post(loginUser);
 router.route("/user/logout").get(isAuthenticatedUser,logoutUser);
 router.route("/user/submitAssignment/:assignId").post(isAuthenticatedUser,submitAssignment);
+router.route("/getLeaderboardInfo").get(getLeaderboardInfo)
 
 
 

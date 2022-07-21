@@ -201,23 +201,41 @@ exports.submitAssignment = async (req, res, next) => {
 exports.getLeaderboardInfo = async(req,res,next)=>{
     //todo
 
-    // const allUsers = await UserModel.find();
+    const allUsers = await UserModel.find();
+    if (!allUsers) {
+        return next(new ErrorHandler("No NCGs are added yet",404))
+    }
+    const leaderBoard = []
+    // rank , ncg name, ncg email , marks
 
-    // const leaderBoard = []
-    // // rank , ncg name, ncg email , marks
-
-    // allUsers.forEach((usr)=>{
-    //     usr.assignments.forEach((assnId)=>{
-    //         const assignment = await AssignmentModel.findById(assnId);
-
-    //     })
-    // })
-
-    const assignment = await AssignmentModel.find();
-
-    assignment.forEach(()=>{
-
+    allUsers.forEach((usr)=>{
+        leaderBoard.push({
+            userId: usr._id.toString(),
+            userName: usr.name,
+            userEmail: usr.email,
+            userMarks: usr.totalMarks
+        })
     })
+    
+    leaderBoard.sort((a, b) => {
+        return b.userMarks - a.userMarks;
+    });
+    let count = 1; 
+    leaderBoard[0].rank = count;
+    for (let i = 1; i < leaderBoard.length; i++) {
+        let element = leaderBoard[i];
+        if(leaderBoard[i].userMarks !== leaderBoard[i-1].userMarks){
+            count++;
+        }
+        element.rank = count;
+        
+    }
+    console.log(leaderBoard)
+
+    return res.status(200).json({
+        success:true,
+        leaderBoard
+    });
 
 
 }
