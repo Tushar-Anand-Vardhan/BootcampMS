@@ -28,6 +28,9 @@ const userSchema = mongoose.Schema({
         type: Number,
         default: 0
     },
+    team:{
+        type:String,
+    },
     assignments:[{type: String}],
 })
 

@@ -43,6 +43,27 @@ const assignmentSchema = mongoose.Schema({
             default: 0
         }
     }],
+    teamSubmittedLink: [{
+        team_id: {
+            type: String,
+        },
+        link: {
+            type: String,
+            default: ""
+        },
+        status: {
+            type: Number,
+            default: 0
+        },
+        date:{
+            type: Date,
+            default: Date.now
+        },
+        marks:{
+            type:Number,
+            default: 0
+        }
+    }],
     //status  -- > 0 , 1 -> sub  , 2 marks given, 3 --> due ( etc)  number
     //submission string , default
 })

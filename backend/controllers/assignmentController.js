@@ -1,11 +1,12 @@
 const AssignmentModel = require("../models/assignmentModel");
 const UserModel = require("../models/userModel");
+const TeamModel = require("../models/teamModel");
 const ErrorHandler = require("../utils/errorHandler");
 
 // Add a assignment, admin uses this method to add a new assignment
 
 exports.createAssignmentForAll = async (req,res,next)=>{
-    const allUsers = await UserModel.find();
+    const allUsers = await UserModel.find({role:"NCG"});
     const allUserIds = [];
     allUsers.forEach((usr)=>{
         const x = {
@@ -168,3 +169,43 @@ exports.uploadOrUpdateMarks = async (req,res,next) => {
 
 }
 
+// create assignment for all teams
+exports.createAssignmentForAllTeams = async (req,res,next)=>{
+    const allTeams = await TeamModel.find();
+    const allTeamIds = [];
+    allTeams.forEach((team)=>{
+        const x = {
+            team_id: team._id,
+        }
+        allTeamIds.push(x)
+    })
+    
+    const teamAssnBody = {
+        title: req.body.title,
+        content: req.body.content,
+        credit: req.body.credit,
+        maxMarks: req.body.maxMarks,
+        teamSubmittedLink: allTeamIds,
+        
+    }
+    console.log(teamAssnBody)
+    const newAssignment = await AssignmentModel.create(teamAssnBody);
+    if(newAssignment){
+        const allTeams = await TeamModel.find();
+        await TeamModel.updateMany({'_id':{ $in : allTeams }},{ 
+            $push:{
+                teamAssignments: newAssignment._id
+            } 
+        })
+
+        
+
+    }else{
+        return next(new ErrorHandler("Assignment could not be created",404));
+    }
+    
+    res.status(201).json({
+        success: true,
+        newAssignment
+    })
+}

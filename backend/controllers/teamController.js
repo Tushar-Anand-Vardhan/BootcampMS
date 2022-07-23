@@ -1,5 +1,7 @@
 const TeamModel = require("../models/teamModel");
 const UserModel = require("../models/userModel");
+const AssignmentModel = require("../models/assignmentModel");
+const ErrorHandler = require("../utils/errorHandler");
 
 // todo: array of ncg id 
 exports.addTeam = async (req,res,next)=>{
@@ -60,28 +62,95 @@ exports.removeTeam = async (req,res,next)=>{
         message:"Team deleted successfully"
     })
 }
-
+// create all teams at once, picking K memebers at a time.
 exports.createAllTeams = async (req,res,next)=>{
-    const teamSize = 3;
+    const teamSize = 3; //number of NCG in a team
     const allUsers = await UserModel.find({role:"NCG"}).select("id");
+    const allMentors = await UserModel.find({role:"mentor"}).select("id");
+    
+    if(!allUsers){
+        return next(new ErrorHandler("No users registered",404));
+    }
     const allUserIds = [];
     allUsers.forEach((usr)=>{
   
         allUserIds.push(usr._id.toString())
     })
+    const allMentorIds = [];
+    allMentors.forEach((men)=>{
+  
+        allMentorIds.push(men._id.toString())
+    })
     const teams = [];
+    let teamCount = 1;
     for (let i = 0; i < allUserIds.length; i += teamSize) {
+        
         const teamMembersId = allUserIds.slice(i, i + teamSize);
         console.log(teamMembersId)
         teams.push({
-            teamName: `Team${i+1}`,
+            teamMentor: allMentorIds[teamCount-1],
+            teamName: `Team${teamCount}`,
             teamMembers: teamMembersId
         })
+        teamCount++;
     }
-    console.log(teams)
     const allTeams = await TeamModel.insertMany(teams);
+
+    allTeams.forEach((team)=>{
+        team.teamMembers.forEach(async (id)=>{
+            const usr = await UserModel.findById(id);
+            usr.team = team._id;
+            usr.save({validateBeforeSave:false});
+        })
+    })
+
     return res.status(200).json({
         success:true,
         allTeams
     })
 }
+
+//submit team assignment. One person submits and everyone in that team gets the marks added.
+exports.submitTeamAssignment = async (req, res, next) => {
+    const status = {
+        NOTSUBMITED:0,
+        SUBMMITED:1,
+        MARKED:2
+    }
+    const ncgId = req.user.id;
+    const teamId = await UserModel.findById(ncgId).select("team")
+    console.log(teamId)
+    console.log("hello")
+    const link = req.body.teamSubmittedLink.link;
+    const teamAssignId = req.params.teamAssignId; // change in route
+    const assn = await AssignmentModel.findById(teamAssignId);
+    if (!assn) {
+        return next(new ErrorHandler("Assignment does not exists",404))
+    }
+    else {
+            const teamAssignment = assn.teamSubmittedLink.find((a)=>{
+                console.log()
+                return (a.team_id === teamId.team);
+            })
+            console.log(teamAssignment)
+
+            if(teamAssignment.status === 0){
+
+                assn.teamSubmittedLink.forEach((subLink)=>{
+                    if(subLink.team_id === teamId.team){
+                        subLink.link = link;
+                        subLink.status = status.SUBMMITED;
+                    }
+                })
+
+            assn.save({validateBeforeSave:false});
+                res.status(200).json({
+                    success: true
+                });
+            }
+            else{
+                return next(new ErrorHandler("You have already submitted your assignment",401))
+            }
+    }
+}
+
