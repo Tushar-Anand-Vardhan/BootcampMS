@@ -1,4 +1,5 @@
 const TeamModel = require("../models/teamModel");
+const UserModel = require("../models/userModel");
 
 // todo: array of ncg id 
 exports.addTeam = async (req,res,next)=>{
@@ -43,29 +44,7 @@ exports.createTeamAssignment = async (req,res,next)=>{
     })
 }
 
-// on the admin dashborad, the admin can add new members to a team
-exports.addMember= async (req,res,next)=>{
-    const updatedTeam = await TeamModel.updateOne(
-        {id: req.params.id},
-        {
-            $push: {
-                members: req.body.member
-            }
-        });
 
-    console.log(updatedTeam)
-    if(!updatedTeam){
-        res.status(404).json({
-            success:false,
-            message:`Cannot add new member`
-        })
-    }
-
-    res.status(200).json({
-        success:true,
-        updatedTeam
-    })
-}
 // on admin dashboard, admin can delete a Team.
 exports.removeTeam = async (req,res,next)=>{
     const deletedTeam = await TeamModel.findById(req.body.id);
@@ -79,5 +58,30 @@ exports.removeTeam = async (req,res,next)=>{
     res.status(200).json({
         success:true,
         message:"Team deleted successfully"
+    })
+}
+
+exports.createAllTeams = async (req,res,next)=>{
+    const teamSize = 3;
+    const allUsers = await UserModel.find({role:"NCG"}).select("id");
+    const allUserIds = [];
+    allUsers.forEach((usr)=>{
+  
+        allUserIds.push(usr._id.toString())
+    })
+    const teams = [];
+    for (let i = 0; i < allUserIds.length; i += teamSize) {
+        const teamMembersId = allUserIds.slice(i, i + teamSize);
+        console.log(teamMembersId)
+        teams.push({
+            teamName: `Team${i+1}`,
+            teamMembers: teamMembersId
+        })
+    }
+    console.log(teams)
+    const allTeams = await TeamModel.insertMany(teams);
+    return res.status(200).json({
+        success:true,
+        allTeams
     })
 }

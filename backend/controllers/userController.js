@@ -51,13 +51,12 @@ exports.addUser = async (req,res,next)=>{
 }
 
 exports.getAllUsers = async (req,res,next)=>{
-    const allUsers = await UserModel.find()
+    const allUsers = await UserModel.find({role:"NCG"})
     res.status(200).json({
         success:true,
         allUsers
     })
 }
-
 
 exports.updateUser = async (req,res,next)=>{
     const updatedUserData = {
@@ -238,4 +237,13 @@ exports.getLeaderboardInfo = async(req,res,next)=>{
     });
 
 
+}
+
+// get all mentors
+exports.getAllMentors = async (req,res,next)=>{
+    const allUsers = await UserModel.find({role:"mentor"})
+    res.status(200).json({
+        success:true,
+        allUsers
+    })
 }
