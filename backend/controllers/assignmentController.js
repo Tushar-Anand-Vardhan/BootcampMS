@@ -209,3 +209,62 @@ exports.createAssignmentForAllTeams = async (req,res,next)=>{
         newAssignment
     })
 }
+
+// update marks for Team with given ID -- send link and marks in body, usr n assn id in params
+
+exports.uploadOrUpdateTeamMarks = async (req,res,next) => {
+
+    const status = {
+        NOTSUBMITED:0,
+        SUBMMITED:1,
+        MARKED:2
+    }
+    const teamId = req.params.teamId
+    const assignmentId = req.params.assignmentId;
+    const {marks} = req.body;
+    const assn = await AssignmentModel.findById(assignmentId);
+    if (!assn) {
+        return next(new ErrorHandler("Assignment does not exists",404))
+    }
+    else {
+        if(marks > assn.maxMarks){
+            return next(new ErrorHandler(`maximum marks for this assignment is ${assn.maxMarks}`,400))
+        }
+            const teamAssignment = assn.teamSubmittedLink.find((a)=>{
+
+                return (a.team_id === teamId);
+            })
+            if(teamAssignment.status === 1){
+
+                assn.teamSubmittedLink.forEach((subLink)=>{
+                if(subLink.team_id === teamId){
+                    subLink.marks = marks;
+                    subLink.status = status.MARKED;
+                }
+            }); 
+
+            assn.save({validateBeforeSave:false});
+            res.status(200).json({
+                success: true
+            });
+
+            const team = await TeamModel.findById(teamId).select("teamMembers");
+            console.log("hello")
+            console.log(team.teamMembers)
+
+            team.teamMembers.forEach(async (member)=>{
+                const usr = await UserModel.findById(member);
+                usr.totalMarks += (marks*assn.credit*100)/assn.maxMarks 
+                usr.save({validateBeforeSave:false});
+            })
+
+            }
+            else if(teamAssignment.status === 2){
+                return next(new ErrorHandler("You have already uploaded marks",401))
+            }
+            else{
+                return next(new ErrorHandler("The NCG has not submitted the assignment",401))
+            }
+    }
+
+}

@@ -88,7 +88,7 @@ exports.createAllTeams = async (req,res,next)=>{
         const teamMembersId = allUserIds.slice(i, i + teamSize);
         console.log(teamMembersId)
         teams.push({
-            teamMentor: allMentorIds[teamCount-1],
+            teamMentor: allMentorIds[(teamCount-1)%allMentorIds.length],
             teamName: `Team${teamCount}`,
             teamMembers: teamMembersId
         })
