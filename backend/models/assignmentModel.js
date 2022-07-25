@@ -18,6 +18,10 @@ const assignmentSchema = mongoose.Schema({
         type: Date,
         default: Date.now // to do + ask future date
     },
+    assignmentType: {
+        type: String,
+        default: 'individual'
+    },
     AllAssignmentStatus: {
         type: Number,
         default: 0

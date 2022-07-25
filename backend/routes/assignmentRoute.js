@@ -1,11 +1,12 @@
 const express = require("express")
 
 const router = express.Router()
-const {createAssignmentForAll, getAllAssignments, updateAssignment, deleteAssignment, getAssignment, getSingleUserSubmission, uploadOrUpdateMarks, createAssignmentForAllTeams, uploadOrUpdateTeamMarks} = require("../controllers/assignmentController");
+const {createAssignmentForAll, getAllAssignments, updateAssignment, deleteAssignment, getAssignment, getSingleUserSubmission, uploadOrUpdateMarks, createAssignmentForAllTeams, uploadOrUpdateTeamMarks, getAllTeamAssignments} = require("../controllers/assignmentController");
 const isAuthenticatedUser = require("../middleware/auth");
 
 
 router.route("/getAllAssignments").get(isAuthenticatedUser,getAllAssignments);
+router.route("/getAllTeamAssignments").get(isAuthenticatedUser,getAllTeamAssignments);
 router.route("/admin/assignments/getAssignment/{assignId}").get(isAuthenticatedUser,getAssignment);
 router.route("/admin/assignments/createAssignmentForAll").post(isAuthenticatedUser,createAssignmentForAll);
 router.route("/admin/assignments/createAssignmentForAllTeams").post(isAuthenticatedUser,createAssignmentForAllTeams);

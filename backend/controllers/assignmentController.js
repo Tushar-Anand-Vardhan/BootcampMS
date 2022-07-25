@@ -19,6 +19,7 @@ exports.createAssignmentForAll = async (req,res,next)=>{
         content: req.body.content,
         credit: req.body.credit,
         maxMarks: req.body.maxMarks,
+        assignmentType: "individual",
         ncgSubmittedLink: allUserIds,
         
     }
@@ -45,7 +46,18 @@ exports.createAssignmentForAll = async (req,res,next)=>{
 }
 // get all assignments in everyone's dashboard
 exports.getAllAssignments = async (req,res,next)=>{
-    const allAssignments = await AssignmentModel.find()
+    const allAssignments = await AssignmentModel.find({
+        assignmentType: 'individual'})
+    res.status(200).json({
+        success:true,
+        allAssignments
+    })
+}
+
+// get all assignments in everyone's dashboard
+exports.getAllTeamAssignments = async (req,res,next)=>{
+    const allAssignments = await AssignmentModel.find({
+        assignmentType: 'team'})
     res.status(200).json({
         success:true,
         allAssignments
@@ -185,6 +197,7 @@ exports.createAssignmentForAllTeams = async (req,res,next)=>{
         content: req.body.content,
         credit: req.body.credit,
         maxMarks: req.body.maxMarks,
+        assignmentType: "team",
         teamSubmittedLink: allTeamIds,
         
     }

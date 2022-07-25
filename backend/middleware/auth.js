@@ -3,6 +3,7 @@ const UserModel = require("../models/userModel");
 
 const isAuthenticatedUser =async (req,res,next)=>{
     const {token} = req.cookies;
+//    const {token} = req.headers["x-access-token"];
     if(!token){
         res.status(401).json({
             success:false,
