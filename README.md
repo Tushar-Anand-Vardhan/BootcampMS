@@ -10,32 +10,7 @@ Bootcamp is an immersive experience for both NCGs and mentors. The goal is to de
 USE CASES
 The following are the use cases that need to be addressed in bootcamp management system.
 
-Version – V1
-NCG Registration
-Ability to register an NCG to the bootcamp by asking all necessary details.
-Assignments
-Create/Modify/Delete new assignments
-Grade individual NCG’s based on performance for a specific assignment
-Individual vs Team Assignments
-Leaderboard
-Gather results for all assignments and show individual & team leaderboards
-Basic UI
-Version - V2
-Basic RBAC support (Role-based access control)
-Roles: Admin, NCG, Mentors
-Basic authentication with username and password
-Should be able to create local users and assign roles
-Advanced Grading System
-Provide different weightage to different assignments. Example – Project is more weighted than other assignments.
-Instead of simply using absolute grading while calculating leaderboard, use Relative grading for individual assignments.
-Enhanced UI
-Version - V3
-Automatic Resource Creation
-For a given team, automatically create wiki pages, git repository, etc.
-Team Auto-Pairing
-Using parameters like proficiency, assigned BU, and qualifications (B.Tech / M.Tech), automatically come up with teams.
-Allow modifications from Admin if needed
-Advanced UI
+
 TOOLS & TECHNOLOGY
 The MEAN stack is JavaScript-based framework for developing web applications. MEAN is named after MongoDB, Express, Angular, and Node, the four key technologies that make up the layers of the stack.
 
