@@ -154,4 +154,21 @@ exports.submitTeamAssignment = async (req, res, next) => {
     }
 }
 
+//getTeamMembers
+exports.getTeamMembers = async (req,res,next)=>{
+    const ncgId = req.user.id;
+    const {team} = await UserModel.findById(ncgId).select("team")
+    if(!team){
+        return next(new ErrorHandler("User does not exists",404))
+    }
+    const teamMembers = await TeamModel.findById(team).select(["teamMembers","teamMentor"])
+    if(!teamMembers){
+        return next(new ErrorHandler("team does not exists",404))
+    }
+    return res.status(200).json({
+        success: true,
+        teamMembers
+    })
+}
+
 

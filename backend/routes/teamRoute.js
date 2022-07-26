@@ -12,7 +12,7 @@ router.route("/admin/teams/createAssignment/{teamId}").post(isAuthenticatedUser,
 router.route("/admin/teams/removeTeam").delete(isAuthenticatedUser,removeTeam);
 router.route("/admin/teams/createAllTeams").post(isAuthenticatedUser,createAllTeams);
 router.route("/teams/submitTeamAssignment/:teamAssignId").post(isAuthenticatedUser,submitTeamAssignment);
-
+router.route("/teams/getTeamMembers").get(isAuthenticatedUser,getTeamMembers);
 
 
 module.exports = router
