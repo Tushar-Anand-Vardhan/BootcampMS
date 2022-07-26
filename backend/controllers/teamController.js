@@ -15,9 +15,32 @@ exports.addTeam = async (req,res,next)=>{
 // used to display all the teams in the admins dashboard
 exports.getAllTeams = async (req,res,next)=>{
     const allTeams = await TeamModel.find()
+    const allTeamDetail = [];
+
+
+    for (let i = 0; i < allTeams.length; i++) {
+        var ncgList = [];
+        const team = allTeams[i]
+        for (let j = 0; j < team.teamMembers.length; j++) {
+            const element = team.teamMembers[j];
+            const usr = await UserModel.findById(element);
+            if(usr){
+                ncgList.push({name:usr.name})
+            }
+        }
+        const mentor = await UserModel.findById(team.teamMentor)
+        
+        allTeamDetail[i] = {
+            name: team.teamName,
+            ncgs: ncgList,
+            mentor: mentor.name,
+            
+        }
+    }
+    
     res.status(200).json({
         success:true,
-        allTeams
+        allTeamDetail
     })
 }
 
@@ -161,13 +184,27 @@ exports.getTeamMembers = async (req,res,next)=>{
     if(!team){
         return next(new ErrorHandler("User does not exists",404))
     }
-    const teamMembers = await TeamModel.findById(team).select(["teamMembers","teamMentor"])
-    if(!teamMembers){
+    const teamDetails = await TeamModel.findById(team).select(["teamMembers","teamMentor"])
+    if(!teamDetails){
         return next(new ErrorHandler("team does not exists",404))
     }
+    var userList = [];
+
+    for (let i = 0; i < teamDetails.teamMembers.length; i++) {
+        const element = teamDetails.teamMembers[i];
+        const usr = await UserModel.findById(element);
+        if(usr){
+            userList.push({name:usr.name, email:usr.email})
+        }
+        
+    }
+    const mentor = await UserModel.findById(teamDetails.teamMentor)
+
+console.log(userList)
     return res.status(200).json({
         success: true,
-        teamMembers
+        userList,
+        mentor
     })
 }
 
