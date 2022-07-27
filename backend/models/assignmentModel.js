@@ -1,7 +1,7 @@
 const mongoose = require("mongoose")
 const assignmentSchema = mongoose.Schema({
-    title:{
-        type:String,
+    title: {
+        type: String,
     },
     content: {
         type: String,
@@ -10,13 +10,13 @@ const assignmentSchema = mongoose.Schema({
         type: Number,
         default: 1
     },
-    maxMarks:{
+    maxMarks: {
         type: Number,
         default: 100
     },
     dueDate: {
         type: Date,
-        default: Date.now // to do + ask future date
+        default: Date.now() + 2 * 24 * 60 * 60 * 1000 
     },
     assignmentType: {
         type: String,
@@ -38,12 +38,12 @@ const assignmentSchema = mongoose.Schema({
             type: Number,
             default: 0
         },
-        date:{
+        date: {
             type: Date,
             default: Date.now
         },
-        marks:{
-            type:Number,
+        marks: {
+            type: Number,
             default: 0
         }
     }],
@@ -59,12 +59,12 @@ const assignmentSchema = mongoose.Schema({
             type: Number,
             default: 0
         },
-        date:{
+        date: {
             type: Date,
             default: Date.now
         },
-        marks:{
-            type:Number,
+        marks: {
+            type: Number,
             default: 0
         }
     }],

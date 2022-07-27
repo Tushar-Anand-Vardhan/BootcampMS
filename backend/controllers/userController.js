@@ -126,7 +126,7 @@ exports.loginUser = async (req, res, next) => {
     }
     const user = await UserModel.findOne({ email }).select("+password");
 
-    if (!user?.password) {//!user || user.password === ""
+    if (!user.password) {//!user || user.password === ""
         return next(new ErrorHandler("User is not added to the bootcamp, please contact admin", 401));
     }
 
@@ -163,20 +163,24 @@ exports.submitAssignment = async (req, res, next) => {
         SUBMMITED: 1,
         MARKED: 2
     }
-    const ncgId = req.user?.id;  //null pointer does not come
+    const ncgId = req.user.id;  //null pointer does not come
     console.log(ncgId)
-    const link = req.body?.ncgSubmittedLink?.link;
-    const assignId = req.params?.assignId;
+    const link = req.body.ncgSubmittedLink.link;
+    const assignId = req.params.assignId;
 
     const assn = await AssignmentModel.findById(assignId);
     if (!assn) {
         return next(new ErrorHandler("Assignment does not exists", 404))
+    } else if (assn.dueDate - Date.now() < 0) {
+        return next(new ErrorHandler("Due date for this assignment has passed"), 400)
     }
     else {
-        const ncgAssignment = assn.ncgSubmittedLink?.find(a => a.ncg_id === ncgId);
-        if (ncgAssignment?.status === 0) {
-            assn.ncgSubmittedLink?.forEach((subLink) => {
-                if (subLink?.ncg_id === ncgId) {
+        const ncgAssignment = assn.ncgSubmittedLink.find(a => a.ncg_id === ncgId);
+        console.log(assn.dueDate, " hi ", Date.now() - assn.dueDate)
+        if (ncgAssignment.status === 0) {
+
+            assn.ncgSubmittedLink.forEach((subLink) => {
+                if (subLink.ncg_id === ncgId) {
                     subLink.link = link;
                     subLink.status = status.SUBMMITED;
                 }
