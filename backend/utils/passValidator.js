@@ -5,9 +5,9 @@ const passwordValidator = require('password-validator');
 const schema = new passwordValidator();
 
 // Add properties to it
-const validatePassword = (password)=>{
+const validatePassword = (password) => {
     schema.is().min(8).is().max(100).has().uppercase().has().lowercase().has().digits().has().not().spaces();
-   const errs = []
+    const errs = []
     schema.validate(password, { details: true }).forEach(err => {
         errs.push(err.message)
     });
