@@ -6,7 +6,7 @@ const isAuthenticatedUser = require("../middleware/auth");
 const authorizedRoles = require("../middleware/authRoles");
 
 
-router.route("/users").get(isAuthenticatedUser,authorizedRoles("admin"),getAllUsers);
+router.route("/users").get(isAuthenticatedUser,authorizedRoles("Admin"),getAllUsers);
 router.route("/user/add").post(addUser);
 router.route("/user/addAll").post(addUserFromExcel);
 router.route("/user/update").post(isAuthenticatedUser,updateUser);
